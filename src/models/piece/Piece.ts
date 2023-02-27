@@ -7,8 +7,8 @@ import { PieceType } from './PieceType';
 import { InvalidMoveError } from './errors';
 
 export class Piece {
-    readonly type: PieceType;
-    readonly totalNumber: number;
+    protected static readonly _type: PieceType;
+    protected static readonly _totalNumber: number;
     _position: Position | null;
 
     constructor() {
@@ -128,5 +128,13 @@ export class Piece {
         }
 
         this._position = targetPosition;
+    }
+
+    public get type() {
+        return (this.constructor as typeof Piece)._type;
+    }
+
+    public get totalNumber() {
+        return (this.constructor as typeof Piece)._totalNumber;
     }
 }

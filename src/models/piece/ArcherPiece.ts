@@ -7,8 +7,8 @@ import { Piece } from './Piece';
 import { PieceType, PieceTypes } from './PieceType';
 
 export class ArcherPiece extends Piece {
-    readonly type: PieceType = PieceTypes.ARCHER;
-    readonly totalNumber: number = 4;
+    protected static readonly _type: PieceType = PieceTypes.ARCHER;
+    protected static readonly _totalNumber: number = 4;
 
     public getAttackedSquares(): Position[] {
         const x = this._position.x;

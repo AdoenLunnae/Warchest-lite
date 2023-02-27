@@ -2,6 +2,6 @@ import { Piece } from './Piece';
 import { PieceType, PieceTypes } from './PieceType';
 
 export class BerserkerPiece extends Piece {
-    readonly type: PieceType = PieceTypes.BERSERKER;
-    readonly totalNumber: number = 4;
+    protected static readonly _type: PieceType = PieceTypes.BERSERKER;
+    protected static readonly _totalNumber: number = 4;
 }
