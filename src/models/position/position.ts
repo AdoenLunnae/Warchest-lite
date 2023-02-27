@@ -28,6 +28,10 @@ class Position {
         return this.fromInts(col, rowNumber);
     }
 
+    public toString(): string {
+        return `{${this.x}, ${this.y}}`;
+    }
+
     public get x() {
         return this._x;
     }
