@@ -1,0 +1,24 @@
+{
+    "root": true,
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+      "@typescript-eslint"
+    ],
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:@typescript-eslint/recommended"
+    ],
+    "rules": {
+        "prettier": [true, ".prettierrc"],
+        "quotemark": [true, "single"],
+        "member-access": [false],
+        "ordered-imports": [false],
+        "max-line-length": [true, 150],
+        "member-ordering": [false],
+        "interface-name": [false],
+        "arrow-parens": 0,
+        "object-literal-sort-keys": false,
+        "comma-dangle": [1, "always-multiline"]
+    }
+}
