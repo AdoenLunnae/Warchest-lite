@@ -1,4 +1,4 @@
-import Position from '../../position/position';
+import { Position } from '../../position';
 import { PieceType } from '../PieceType';
 
 export class InvalidMoveError extends Error {

@@ -2,7 +2,7 @@ import {
     InvalidColNumberError,
     InvalidRowNumberError,
 } from '../position/errors';
-import Position from '../position/position';
+import { Position } from '../position';
 import { Piece } from './Piece';
 import { PieceType, PieceTypes } from './PieceType';
 

@@ -1,5 +1,5 @@
 import { Piece } from './Piece';
-import Position from '../position/position';
+import { Position } from '../position';
 
 describe('Base Piece', () => {
     let piece: Piece;

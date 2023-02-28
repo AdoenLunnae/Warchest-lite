@@ -4,7 +4,7 @@ import {
     InvalidRowNumberError,
 } from './errors';
 
-class Position {
+export class Position {
     private _x: number;
     private _y: number;
 
@@ -48,5 +48,3 @@ class Position {
         this._y = newY;
     }
 }
-
-export default Position;

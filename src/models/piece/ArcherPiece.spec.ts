@@ -1,4 +1,4 @@
-import Position from '../position/position';
+import { Position } from '../position';
 import { ArcherPiece } from './ArcherPiece';
 import { PieceTypes } from './PieceType';
 
