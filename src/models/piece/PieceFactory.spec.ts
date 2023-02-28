@@ -1,7 +1,7 @@
 import { ArcherPiece } from './ArcherPiece';
 import { BerserkerPiece } from './BerserkerPiece';
 import { MercenaryPiece } from './MercenaryPiece';
-import PieceFactory from './PieceFactory';
+import { PieceFactory } from './PieceFactory';
 import { PieceTypes } from './PieceType';
 import { SwordsmanPiece } from './SwordsmanPiece';
 

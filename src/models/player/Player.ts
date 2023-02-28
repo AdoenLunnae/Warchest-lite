@@ -1,6 +1,4 @@
-import { Piece } from '../piece/Piece';
-import { PieceType } from '../piece/PieceType';
-import PieceFactory from '../piece/PieceFactory';
+import { PieceFactory, Piece, PieceType } from '../piece';
 
 interface RecruitablePiece {
     type: PieceType;

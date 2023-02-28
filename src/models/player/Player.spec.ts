@@ -1,6 +1,4 @@
-import { Piece } from '../piece/Piece';
-import { PieceTypes } from '../piece/PieceType';
-import PieceFactory from '../piece/PieceFactory';
+import { Piece, PieceTypes, PieceFactory } from '../piece';
 import { Player } from './Player';
 
 describe('Player', () => {

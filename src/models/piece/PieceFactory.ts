@@ -5,7 +5,7 @@ import { MercenaryPiece } from './MercenaryPiece';
 import { SwordsmanPiece } from './SwordsmanPiece';
 import { PieceType, PieceTypes } from './PieceType';
 
-export default abstract class PieceFactory {
+export abstract class PieceFactory {
     public static pieceOfType(type: PieceType): Piece {
         switch (type) {
             case PieceTypes.ARCHER:
