@@ -1,6 +1,6 @@
 import { Position } from '../position';
 import { ArcherPiece } from './ArcherPiece';
-import { PieceTypes } from './PieceType';
+import { PieceType } from './PieceType';
 
 describe('Archer Piece', () => {
     let archer: ArcherPiece;
@@ -14,7 +14,7 @@ describe('Archer Piece', () => {
     });
 
     it('should have the archer type', () => {
-        expect(archer.type).toBe(PieceTypes.ARCHER);
+        expect(archer.type).toBe(PieceType.ARCHER);
     });
 
     it('can shoot 2 squares orthogonal or diagonal', () => {

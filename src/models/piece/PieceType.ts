@@ -1,11 +1,14 @@
-export interface PieceType {
-    short: string;
-    long: string;
-}
+export class PieceType {
+    static readonly ARCHER = new PieceType('A', 'Archer');
+    static readonly BERSERKER = new PieceType('B', 'Berserker');
+    static readonly MERCENARY = new PieceType('M', 'Mercenary');
+    static readonly SWORDSMAN = new PieceType('S', 'Swordsman');
 
-export const PieceTypes = {
-    ARCHER: { short: 'A', long: 'Archer' },
-    BERSERKER: { short: 'B', long: 'Berserker' },
-    MERCENARY: { short: 'M', long: 'Mercenary' },
-    SWORDSMAN: { short: 'S', long: 'Swordsman' },
-} as const;
+    public readonly short: string;
+    public readonly long: string;
+
+    private constructor(short: string, long: string) {
+        this.short = short;
+        this.long = long;
+    }
+}

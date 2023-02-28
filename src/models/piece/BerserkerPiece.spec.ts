@@ -1,5 +1,5 @@
 import { BerserkerPiece } from './BerserkerPiece';
-import { PieceTypes } from './PieceType';
+import { PieceType } from './PieceType';
 
 describe('Berserker Piece', () => {
     let berserker: BerserkerPiece;
@@ -12,6 +12,6 @@ describe('Berserker Piece', () => {
     });
 
     it('should have the berserker type', () => {
-        expect(berserker.type).toBe(PieceTypes.BERSERKER);
+        expect(berserker.type).toBe(PieceType.BERSERKER);
     });
 });

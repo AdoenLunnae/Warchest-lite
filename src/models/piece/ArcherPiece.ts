@@ -4,10 +4,10 @@ import {
 } from '../position/errors';
 import { Position } from '../position';
 import { Piece } from './Piece';
-import { PieceType, PieceTypes } from './PieceType';
+import { PieceType } from './PieceType';
 
 export class ArcherPiece extends Piece {
-    protected static readonly _type: PieceType = PieceTypes.ARCHER;
+    protected static readonly _type: PieceType = PieceType.ARCHER;
     protected static readonly _totalNumber: number = 4;
 
     public getAttackedSquares(): Position[] {

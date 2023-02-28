@@ -1,5 +1,5 @@
 import { SwordsmanPiece } from './SwordsmanPiece';
-import { PieceTypes } from './PieceType';
+import { PieceType } from './PieceType';
 
 describe('Swordsman Piece', () => {
     let swordsman: SwordsmanPiece;
@@ -12,6 +12,6 @@ describe('Swordsman Piece', () => {
     });
 
     it('should have the mercenary type', () => {
-        expect(swordsman.type).toBe(PieceTypes.SWORDSMAN);
+        expect(swordsman.type).toBe(PieceType.SWORDSMAN);
     });
 });

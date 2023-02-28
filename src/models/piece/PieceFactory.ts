@@ -3,18 +3,18 @@ import { ArcherPiece } from './ArcherPiece';
 import { BerserkerPiece } from './BerserkerPiece';
 import { MercenaryPiece } from './MercenaryPiece';
 import { SwordsmanPiece } from './SwordsmanPiece';
-import { PieceType, PieceTypes } from './PieceType';
+import { PieceType } from './PieceType';
 
 export abstract class PieceFactory {
     public static pieceOfType(type: PieceType): Piece {
         switch (type) {
-            case PieceTypes.ARCHER:
+            case PieceType.ARCHER:
                 return new ArcherPiece();
-            case PieceTypes.BERSERKER:
+            case PieceType.BERSERKER:
                 return new BerserkerPiece();
-            case PieceTypes.MERCENARY:
+            case PieceType.MERCENARY:
                 return new MercenaryPiece();
-            case PieceTypes.SWORDSMAN:
+            case PieceType.SWORDSMAN:
                 return new SwordsmanPiece();
         }
     }

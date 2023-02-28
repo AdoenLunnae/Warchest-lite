@@ -1,11 +1,11 @@
-import { Piece, PieceTypes, PieceFactory } from '../piece';
+import { Piece, PieceType, PieceFactory } from '../piece';
 import { Player } from './Player';
 
 describe('Player', () => {
     it('creates with the specified piece types', () => {
         const player = Player.withPieceTypes([
-            PieceTypes.ARCHER,
-            PieceTypes.MERCENARY,
+            PieceType.ARCHER,
+            PieceType.MERCENARY,
         ]);
 
         expect(player).toBeInstanceOf(Player);
@@ -14,11 +14,11 @@ describe('Player', () => {
         expect(player['_recruitment']).toEqual(
             expect.arrayContaining([
                 {
-                    type: PieceTypes.ARCHER,
+                    type: PieceType.ARCHER,
                     availableQuantity: 2,
                 },
                 {
-                    type: PieceTypes.MERCENARY,
+                    type: PieceType.MERCENARY,
                     availableQuantity: 3,
                 },
             ]),
@@ -26,8 +26,8 @@ describe('Player', () => {
     });
     it('can draw a hand from the bag', () => {
         const player = Player.withPieceTypes([
-            PieceTypes.ARCHER,
-            PieceTypes.MERCENARY,
+            PieceType.ARCHER,
+            PieceType.MERCENARY,
         ]);
         player.drawHand();
         expect(player['_hand'].length).toBe(3);
@@ -36,20 +36,20 @@ describe('Player', () => {
 
     it('can recruit pieces into the bag', () => {
         const player = Player.withPieceTypes([
-            PieceTypes.ARCHER,
-            PieceTypes.MERCENARY,
+            PieceType.ARCHER,
+            PieceType.MERCENARY,
         ]);
-        player.recruit(PieceTypes.ARCHER);
+        player.recruit(PieceType.ARCHER);
 
         expect(player['_bag'].length).toBe(5);
         expect(player['_recruitment']).toEqual(
             expect.arrayContaining([
                 {
-                    type: PieceTypes.ARCHER,
+                    type: PieceType.ARCHER,
                     availableQuantity: 1,
                 },
                 {
-                    type: PieceTypes.MERCENARY,
+                    type: PieceType.MERCENARY,
                     availableQuantity: 3,
                 },
             ]),
@@ -58,31 +58,31 @@ describe('Player', () => {
 
     it('can discard pieces from hand', () => {
         const player = Player.withPieceTypes([
-            PieceTypes.ARCHER,
-            PieceTypes.MERCENARY,
+            PieceType.ARCHER,
+            PieceType.MERCENARY,
         ]);
-        player['_hand'].push(PieceFactory.pieceOfType(PieceTypes.ARCHER));
+        player['_hand'].push(PieceFactory.pieceOfType(PieceType.ARCHER));
 
-        player.discard(PieceTypes.ARCHER);
+        player.discard(PieceType.ARCHER);
 
         expect(player['_hand'].length).toBe(0);
         expect(player['_discard']).toEqual(
             expect.arrayContaining([
-                PieceFactory.pieceOfType(PieceTypes.ARCHER),
+                PieceFactory.pieceOfType(PieceType.ARCHER),
             ]),
         );
     });
 
     it('can refill bag from discard', () => {
         const player = Player.withPieceTypes([
-            PieceTypes.ARCHER,
-            PieceTypes.MERCENARY,
+            PieceType.ARCHER,
+            PieceType.MERCENARY,
         ]);
         player['_bag'].splice(0, 4);
         const pieces: Piece[] = [
-            PieceFactory.pieceOfType(PieceTypes.ARCHER),
-            PieceFactory.pieceOfType(PieceTypes.BERSERKER),
-            PieceFactory.pieceOfType(PieceTypes.ARCHER),
+            PieceFactory.pieceOfType(PieceType.ARCHER),
+            PieceFactory.pieceOfType(PieceType.BERSERKER),
+            PieceFactory.pieceOfType(PieceType.ARCHER),
         ];
 
         player['_discard'] = [...pieces];

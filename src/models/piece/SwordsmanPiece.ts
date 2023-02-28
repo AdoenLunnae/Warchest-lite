@@ -1,7 +1,7 @@
 import { Piece } from './Piece';
-import { PieceType, PieceTypes } from './PieceType';
+import { PieceType } from './PieceType';
 
 export class SwordsmanPiece extends Piece {
-    protected static readonly _type: PieceType = PieceTypes.SWORDSMAN;
+    protected static readonly _type: PieceType = PieceType.SWORDSMAN;
     protected static readonly _totalNumber: number = 4;
 }
