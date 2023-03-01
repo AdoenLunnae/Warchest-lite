@@ -4,6 +4,7 @@ import { BerserkerPiece } from './BerserkerPiece';
 import { MercenaryPiece } from './MercenaryPiece';
 import { SwordsmanPiece } from './SwordsmanPiece';
 import { PieceType } from './PieceType';
+import { Position } from '../position';
 
 export class PieceFactory {
     private constructor() {}
@@ -20,5 +21,11 @@ export class PieceFactory {
             default:
                 throw new Error('Invalid Piece Type');
         }
+    }
+
+    public static pieceOfTypeAt(type: PieceType, position: Position): Piece {
+        const piece = this.pieceOfType(type);
+        piece.moveTo(position);
+        return piece;
     }
 }
