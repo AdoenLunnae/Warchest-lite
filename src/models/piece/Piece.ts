@@ -28,102 +28,43 @@ export class Piece {
     public getMoves(): Position[] {
         if (this.position === null) return this._allMoves();
 
-        const x = this.position.x;
-        const y = this.position.y;
-
-        var validMoves = Array<Position>();
-
-        const possibleMoves: Array<{ x: number; y: number }> = [
-            { x: 1, y: 0 },
-            { x: -1, y: 0 },
-            { x: 0, y: -1 },
-            { x: 0, y: 1 },
-        ];
-
-        possibleMoves.forEach((targetPosition) => {
-            try {
-                validMoves.push(
-                    Position.fromInts(
-                        x + targetPosition.x,
-                        y + targetPosition.y,
-                    ),
-                );
-            } catch (e) {
-                if (
-                    !(
-                        e instanceof InvalidColNumberError ||
-                        e instanceof InvalidRowNumberError
-                    )
-                )
-                    throw e;
-            }
-        });
-
-        return validMoves;
+        return this.position.getOrthogonallyAdjacent();
     }
+
     public getAttackedSquares(): Position[] {
         if (this.position === null) return [];
 
-        const x = this.position.x;
-        const y = this.position.y;
-
-        const possibleAttacks: Array<{ x: number; y: number }> = [
-            { x: 1, y: 0 },
-            { x: -1, y: 0 },
-            { x: 0, y: -1 },
-            { x: 0, y: 1 },
-            { x: 1, y: 1 },
-            { x: -1, y: 1 },
-            { x: 1, y: -1 },
-            { x: -1, y: -1 },
-        ];
-        var validAttacks = Array<Position>();
-
-        possibleAttacks.forEach((attackPosition) => {
-            try {
-                validAttacks.push(
-                    Position.fromInts(
-                        x + attackPosition.x,
-                        y + attackPosition.y,
-                    ),
-                );
-            } catch (e) {
-                if (
-                    !(
-                        e instanceof InvalidColNumberError ||
-                        e instanceof InvalidRowNumberError
-                    )
-                )
-                    throw e;
-            }
-        });
-        return validAttacks;
+        return this.position.getAllAdjacent();
     }
 
     get position(): Position | null {
         return this._position;
     }
 
-    public _canMoveTo(targetPosition: Position): boolean {
+    public canMoveTo(targetPosition: Position): boolean {
         return this.getMoves().some(
             (i) => i.x === targetPosition.x && i.y === targetPosition.y,
         );
     }
 
-    public _canAttackTo(targetPosition: Position): boolean {
-        return this.getAttackedSquares().includes(targetPosition);
+    public canAttackTo(targetPosition: Position): boolean {
+        return this.getAttackedSquares().some(
+            (attackedPosition) =>
+                attackedPosition.x == targetPosition.x &&
+                attackedPosition.y === targetPosition.y,
+        );
     }
 
-    public _placeAt(targetPosition: Position) {
+    public placeAt(targetPosition: Position) {
         this._position = targetPosition;
     }
 
     public moveTo(targetPosition: Position) {
         if (this.position === null) {
-            this._placeAt(targetPosition);
+            this.placeAt(targetPosition);
             return;
         }
-        if (!this._canMoveTo(targetPosition)) {
+        if (!this.canMoveTo(targetPosition)) {
             throw InvalidMoveError.with(
                 this.type,
                 this.position,

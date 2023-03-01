@@ -12,39 +12,18 @@ export class ArcherPiece extends Piece {
 
     public getAttackedSquares(): Position[] {
         if (this.position === null) return [];
-        const x = this.position.x;
-        const y = this.position.y;
 
-        const possibleAttacks: Array<{ x: number; y: number }> = [
-            { x: -2, y: 0 },
-            { x: 2, y: 0 },
-            { x: 0, y: -2 },
-            { x: 0, y: 2 },
-            { x: -2, y: -2 },
-            { x: -2, y: 2 },
-            { x: 2, y: -2 },
-            { x: 2, y: 2 },
+        const possibleAttacks = [
+            { deltaX: -2, deltaY: 0 },
+            { deltaX: 2, deltaY: 0 },
+            { deltaX: 0, deltaY: -2 },
+            { deltaX: 0, deltaY: 2 },
+            { deltaX: -2, deltaY: -2 },
+            { deltaX: -2, deltaY: 2 },
+            { deltaX: 2, deltaY: -2 },
+            { deltaX: 2, deltaY: 2 },
         ];
-        var validAttacks = Array<Position>();
 
-        possibleAttacks.forEach((attackPosition) => {
-            try {
-                validAttacks.push(
-                    Position.fromInts(
-                        x + attackPosition.x,
-                        y + attackPosition.y,
-                    ),
-                );
-            } catch (e) {
-                if (
-                    !(
-                        e instanceof InvalidColNumberError ||
-                        e instanceof InvalidRowNumberError
-                    )
-                )
-                    throw e;
-            }
-        });
-        return validAttacks;
+        return this.position.getFromDeltaList(possibleAttacks);
     }
 }
