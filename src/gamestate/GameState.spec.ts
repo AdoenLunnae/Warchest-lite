@@ -184,6 +184,29 @@ e|  .  .  .  W  . \n\
                 GameError.withCause(GameErrorCause.InactivePlayerMove),
             );
         });
+
+        it("throws when you can't discard", () => {
+            gs['_piecesInPlay'] = [
+                {
+                    piece: PieceFactory.pieceOfTypeAt(
+                        PieceType.ARCHER,
+                        Position.from(2, 'a'),
+                    ),
+                    controller: gs.crow,
+                },
+            ];
+
+            gs.crow['_hand'] = [];
+            expect(() => {
+                gs.attemptMove(
+                    PieceType.ARCHER,
+                    Position.from(2, 'a'),
+                    Position.from(3, 'a'),
+                );
+            }).toThrowError(
+                GameError.withCause(GameErrorCause.NoPieceToDiscard),
+            );
+        });
     });
 
     describe('Piece Placement', () => {
@@ -254,22 +277,30 @@ e|  .  .  .  W  . \n\
 
     describe('Attacks', () => {
         const performAttack = () =>
-            gs.attemptAttack(Position.from(2, 'a'), Position.from(4, 'a'));
+            gs.attemptAttack(
+                PieceType.ARCHER,
+                Position.from(2, 'a'),
+                Position.from(4, 'a'),
+            );
 
         it('removes a piece that is attacked', () => {
-            const pieces: ControlledPiece[] = [
+            gs['_piecesInPlay'] = [
                 {
-                    piece: PieceFactory.pieceOfType(PieceType.ARCHER),
-                    controller: gs['_crow'],
+                    piece: PieceFactory.pieceOfTypeAt(
+                        PieceType.ARCHER,
+                        Position.from(2, 'a'),
+                    ),
+                    controller: gs.crow,
                 },
                 {
-                    piece: PieceFactory.pieceOfType(PieceType.SWORDSMAN),
-                    controller: gs['_wolf'],
+                    piece: PieceFactory.pieceOfTypeAt(
+                        PieceType.SWORDSMAN,
+                        Position.from(4, 'a'),
+                    ),
+                    controller: gs.wolf,
                 },
             ];
-            pieces[0].piece['_position'] = Position.from(2, 'a');
-            pieces[1].piece['_position'] = Position.from(4, 'a');
-            gs['_piecesInPlay'] = pieces;
+            gs.crow['_hand'] = [PieceFactory.pieceOfType(PieceType.ARCHER)];
 
             performAttack();
 
@@ -299,14 +330,15 @@ e|  .  .  .  W  . \n\
         });
 
         it('throws when attempting to attack an empty square', () => {
-            const pieces: ControlledPiece[] = [
+            gs['_piecesInPlay'] = [
                 {
-                    piece: PieceFactory.pieceOfType(PieceType.ARCHER),
-                    controller: gs['_crow'],
+                    piece: PieceFactory.pieceOfTypeAt(
+                        PieceType.ARCHER,
+                        Position.from(2, 'a'),
+                    ),
+                    controller: gs.crow,
                 },
             ];
-            pieces[0].piece['_position'] = Position.from(2, 'a');
-            gs['_piecesInPlay'] = pieces;
 
             expect(performAttack).toThrowError(
                 GameError.withCause(GameErrorCause.NoAttackTarget),
@@ -336,7 +368,32 @@ e|  .  .  .  W  . \n\
             );
         });
 
-        it('throws when attempting an invalid attack', () => {
+        it("throws when you can' discard", () => {
+            gs['_piecesInPlay'] = [
+                {
+                    piece: PieceFactory.pieceOfTypeAt(
+                        PieceType.ARCHER,
+                        Position.from(2, 'a'),
+                    ),
+                    controller: gs.crow,
+                },
+                {
+                    piece: PieceFactory.pieceOfTypeAt(
+                        PieceType.ARCHER,
+                        Position.from(4, 'a'),
+                    ),
+                    controller: gs.wolf,
+                },
+            ];
+
+            gs.crow['_hand'] = [];
+
+            expect(performAttack).toThrowError(
+                GameError.withCause(GameErrorCause.NoPieceToDiscard),
+            );
+        });
+
+        it('throws when you can', () => {
             gs['_piecesInPlay'] = [
                 {
                     piece: PieceFactory.pieceOfTypeAt(

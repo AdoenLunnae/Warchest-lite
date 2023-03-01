@@ -71,7 +71,7 @@ export class Player {
     public discard(ofType: PieceType): void {
         const idx = this._hand.findIndex((piece) => piece.type == ofType);
 
-        if (idx === -1) return;
+        if (idx === -1) throw new Error();
 
         this._discard.push(this._hand.splice(idx, 1)[0]);
     }

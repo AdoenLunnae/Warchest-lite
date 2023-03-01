@@ -299,6 +299,9 @@ export class GameState {
         if (initialSquare.controlledPiece.piece.type !== discardedPieceType)
             throw GameError.withCause(GameErrorCause.UnmatchingPieces);
 
+        if (!this.activePlayer.hasPieceInHand(discardedPieceType))
+            throw GameError.withCause(GameErrorCause.NoPieceToDiscard);
+
         this.activePlayer.discard(discardedPieceType);
 
         this._piecesInPlay
@@ -340,7 +343,11 @@ export class GameState {
         });
     }
 
-    public attemptAttack(initialPosition: Position, targetPosition: Position) {
+    public attemptAttack(
+        discardedPieceType: PieceType,
+        initialPosition: Position,
+        targetPosition: Position,
+    ) {
         const initialSquare = this.at(initialPosition.row, initialPosition.col);
         const targetSquare = this.at(targetPosition.row, targetPosition.col);
 
@@ -358,6 +365,14 @@ export class GameState {
 
         if (!initialSquare.controlledPiece.piece.canAttackTo(targetPosition))
             throw GameError.withCause(GameErrorCause.InvalidAttack);
+
+        if (initialSquare.controlledPiece.piece.type !== discardedPieceType)
+            throw GameError.withCause(GameErrorCause.UnmatchingPieces);
+
+        if (!this.activePlayer.hasPieceInHand(discardedPieceType))
+            throw GameError.withCause(GameErrorCause.NoPieceToDiscard);
+
+        this.activePlayer.discard(discardedPieceType);
 
         this._piecesInPlay.splice(
             this._piecesInPlay.findIndex(
