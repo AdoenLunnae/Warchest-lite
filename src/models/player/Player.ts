@@ -59,6 +59,13 @@ export class Player {
         this._bag.push(PieceFactory.pieceOfType(this._recruitment[idx].type));
     }
 
+    public place(pieceType: PieceType) {
+        this._hand.splice(
+            this._hand.findIndex((piece) => piece.type === pieceType),
+            1,
+        );
+    }
+
     public discard(ofType: PieceType): void {
         const idx = this._hand.findIndex((piece) => piece.type == ofType);
 
@@ -83,5 +90,25 @@ export class Player {
 
     public get discardString(): string {
         return this._discard.map((piece) => piece.type.long).join(', ');
+    }
+
+    public get handIsEmpty(): boolean {
+        return this._hand.length == 0;
+    }
+
+    public get recruitmentIsEmpty(): boolean {
+        return this._recruitment.every((item) => item.availableQuantity == 0);
+    }
+
+    public get bagtIsEmpty(): boolean {
+        return this._bag.length == 0;
+    }
+
+    public hasNoMoreUnits(): boolean {
+        return this.handIsEmpty && this.bagtIsEmpty && this.recruitmentIsEmpty;
+    }
+
+    public hasPieceInHand(pieceType: PieceType): boolean {
+        return this._hand.some((piece) => piece.type === pieceType);
     }
 }
