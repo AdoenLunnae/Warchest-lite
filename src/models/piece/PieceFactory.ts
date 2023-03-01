@@ -19,7 +19,7 @@ export class PieceFactory {
             case PieceType.SWORDSMAN:
                 return new SwordsmanPiece();
             default:
-                throw new Error('Invalid Piece Type');
+                throw new Error(`Invalid Piece Type: ${type}`);
         }
     }
 

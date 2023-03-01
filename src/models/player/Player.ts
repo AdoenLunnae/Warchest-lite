@@ -13,6 +13,7 @@ export class Player {
 
     private setUpBag(availablePieceTypes: PieceType[]): void {
         this._bag = [];
+        debugger;
         availablePieceTypes.forEach((type) => {
             this._bag.push(PieceFactory.pieceOfType(type));
             this._bag.push(PieceFactory.pieceOfType(type));
@@ -53,7 +54,8 @@ export class Player {
     public recruit(ofType: PieceType): void {
         const idx = this._recruitment.findIndex((item) => item.type == ofType);
 
-        if (idx === -1 || this._recruitment[idx].availableQuantity < 1) return;
+        if (idx === -1 || this._recruitment[idx].availableQuantity < 1)
+            throw new Error('No more pieces of this type to recruit');
 
         this._recruitment[idx].availableQuantity -= 1;
         this._bag.push(PieceFactory.pieceOfType(this._recruitment[idx].type));
@@ -100,12 +102,12 @@ export class Player {
         return this._recruitment.every((item) => item.availableQuantity == 0);
     }
 
-    public get bagtIsEmpty(): boolean {
+    public get bagIsEmpty(): boolean {
         return this._bag.length == 0;
     }
 
     public hasNoMoreUnits(): boolean {
-        return this.handIsEmpty && this.bagtIsEmpty && this.recruitmentIsEmpty;
+        return this.handIsEmpty && this.bagIsEmpty && this.recruitmentIsEmpty;
     }
 
     public hasPieceInHand(pieceType: PieceType): boolean {

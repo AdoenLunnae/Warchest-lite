@@ -12,8 +12,8 @@ describe('Position', () => {
         const position = Position.fromInts(x, y);
 
         expect(position).toBeInstanceOf(Position);
-        expect(position.x).toBe(x);
-        expect(position.y).toBe(y);
+        expect(position.col).toBe(x);
+        expect(position.row).toBe(y);
     });
 
     it('creates from an int and a letter', () => {
@@ -22,8 +22,8 @@ describe('Position', () => {
         const position = Position.from(col, row);
 
         expect(position).toBeInstanceOf(Position);
-        expect(position.x).toBe(col);
-        expect(position.y).toBe(3);
+        expect(position.col).toBe(col);
+        expect(position.row).toBe(3);
     });
 
     it('fails when an invalid number is passed as col', () => {

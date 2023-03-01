@@ -29,22 +29,22 @@ export class Position {
     }
 
     public toString(): string {
-        return `{${this.x}, ${this.y}}`;
+        return `{${this.col}, ${this.row}}`;
     }
 
-    public get x() {
+    public get col() {
         return this._x;
     }
 
-    private set x(newX: number) {
+    private set col(newX: number) {
         this._x = newX;
     }
 
-    public get y() {
+    public get row() {
         return this._y;
     }
 
-    private set y(newY: number) {
+    private set row(newY: number) {
         this._y = newY;
     }
 

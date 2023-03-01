@@ -43,15 +43,15 @@ export class Piece {
 
     public canMoveTo(targetPosition: Position): boolean {
         return this.getMoves().some(
-            (i) => i.x === targetPosition.x && i.y === targetPosition.y,
+            (i) => i.col === targetPosition.col && i.row === targetPosition.row,
         );
     }
 
     public canAttackTo(targetPosition: Position): boolean {
         return this.getAttackedSquares().some(
             (attackedPosition) =>
-                attackedPosition.x == targetPosition.x &&
-                attackedPosition.y === targetPosition.y,
+                attackedPosition.col == targetPosition.col &&
+                attackedPosition.row === targetPosition.row,
         );
     }
 
