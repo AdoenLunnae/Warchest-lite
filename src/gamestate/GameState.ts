@@ -3,7 +3,7 @@ import { Player } from '../models/player';
 import { Position } from '../models/position';
 import { GameError, GameErrorCause } from './GameError';
 
-export class ControlledPiece {
+export interface ControlledPiece {
     piece: Piece;
     controller: Player;
 }
@@ -53,7 +53,7 @@ export class GameState {
     private _controlZones: ControlZone[];
 
     private switchByPlayer<T>(
-        player: Player,
+        player: Player | null,
         wolfCallback: () => T,
         crowCallback: () => T,
         defaultCallback: () => T,
@@ -80,8 +80,24 @@ export class GameState {
     }
 
     public constructor() {
-        const crowPieces = [PieceType.ARCHER, PieceType.MERCENARY];
-        const wolfPieces = [PieceType.BERSERKER, PieceType.SWORDSMAN];
+        const pieces = [
+            PieceType.ARCHER,
+            PieceType.BERSERKER,
+            PieceType.MERCENARY,
+            PieceType.SWORDSMAN,
+        ];
+
+        var index: number;
+        var selectedPieces: PieceType[] = [];
+        var leftPieces: PieceType[] = [...pieces];
+
+        for (let i = 0; i < pieces.length / 2; ++i) {
+            index = Math.floor(Math.random() * leftPieces.length);
+            selectedPieces.push(leftPieces.splice(index, 1)[0]);
+        }
+
+        const crowPieces = [...selectedPieces];
+        const wolfPieces = [...leftPieces];
 
         this._crow = Player.withPieceTypes(crowPieces);
         this._wolf = Player.withPieceTypes(wolfPieces);
@@ -126,11 +142,11 @@ export class GameState {
         var pieceAt = this._piecesInPlay.find(
             ({ piece }) =>
                 piece.position !== null &&
-                piece.position.x == col &&
-                piece.position.y == row,
+                piece.position.col == col &&
+                piece.position.row == row,
         );
         var controlZoneAt = this._controlZones.find(
-            ({ position }) => position.x == col && position.y == row,
+            ({ position }) => position.col == col && position.row == row,
         );
         return {
             controlledPiece: pieceAt || null,
@@ -228,17 +244,45 @@ export class GameState {
         );
     }
 
-    public gainControlOfZone(position: Position) {
-        if (this.at(position.y, position.x).controlZone === null)
-            throw GameError.withCause(GameErrorCause.NoControlZone);
-
-        this.at(position.y, position.x).controlZone.controller =
-            this._activePlayer;
+    public getWinner(): string | null {
+        if (this.checkWin(this.crow)) return 'Crow';
+        if (this.checkWin(this.wolf)) return 'Wolf';
+        return null;
     }
 
-    public attemptMove(initialPosition: Position, targetPosition: Position) {
-        const initialSquare = this.at(initialPosition.y, initialPosition.x);
-        const targetSquare = this.at(targetPosition.y, targetPosition.x);
+    public gainControlOfZone(
+        discardedPieceType: PieceType,
+        position: Position,
+    ) {
+        const controlZoneIdx = this._controlZones.findIndex(
+            (zone) =>
+                zone.position.row === position.row &&
+                zone.position.col === position.col,
+        );
+
+        if (controlZoneIdx === -1)
+            throw GameError.withCause(GameErrorCause.NoControlZone);
+        const controlZone = this._controlZones[controlZoneIdx];
+        const piece = this.at(
+            controlZone.position.row,
+            controlZone.position.col,
+        ).controlledPiece;
+        if (piece === null || piece.controller !== this.activePlayer)
+            throw GameError.withCause(GameErrorCause.NoPieceToControlWith);
+        if (piece!.piece.type !== discardedPieceType)
+            throw GameError.withCause(GameErrorCause.UnmatchingPieces);
+
+        this.activePlayer.discard(discardedPieceType);
+        this._controlZones[controlZoneIdx].controller = this._activePlayer;
+    }
+
+    public attemptMove(
+        discardedPieceType: PieceType,
+        initialPosition: Position,
+        targetPosition: Position,
+    ) {
+        const initialSquare = this.at(initialPosition.row, initialPosition.col);
+        const targetSquare = this.at(targetPosition.row, targetPosition.col);
 
         if (initialSquare.controlledPiece === null)
             throw GameError.withCause(GameErrorCause.NoPieceToMove);
@@ -252,28 +296,36 @@ export class GameState {
         if (!initialSquare.controlledPiece.piece.canMoveTo(targetPosition))
             throw GameError.withCause(GameErrorCause.InvalidMove);
 
+        if (initialSquare.controlledPiece.piece.type !== discardedPieceType)
+            throw GameError.withCause(GameErrorCause.UnmatchingPieces);
+
+        this.activePlayer.discard(discardedPieceType);
+
         this._piecesInPlay
-            .find((piece) => piece == initialSquare.controlledPiece)
+            .find((piece) => piece == initialSquare.controlledPiece)!
             .piece.moveTo(targetPosition);
     }
 
+    private _getPositionsToPlace(): Position[] {
+        return this._controlZones.flatMap((controlZone) =>
+            controlZone.controller === this._activePlayer
+                ? controlZone.position.getOrthogonallyAdjacent()
+                : [],
+        );
+    }
+
     public attemptPlace(pieceType: PieceType, targetPosition: Position) {
-        const targetSquare = this.at(targetPosition.y, targetPosition.x);
+        const targetSquare = this.at(targetPosition.row, targetPosition.col);
 
         if (targetSquare.controlledPiece !== null)
             throw GameError.withCause(GameErrorCause.OcuppiedTargetSquare);
 
-        var availablePositions: Position[] = this._controlZones.flatMap(
-            (controlZone) =>
-                controlZone.controller === this._activePlayer
-                    ? controlZone.position.getOrthogonallyAdjacent()
-                    : [],
-        );
+        var availablePositions = this._getPositionsToPlace();
         if (
             !availablePositions.some(
                 (position) =>
-                    position.x === targetPosition.x &&
-                    position.y === targetPosition.y,
+                    position.col === targetPosition.col &&
+                    position.row === targetPosition.row,
             )
         )
             throw GameError.withCause(GameErrorCause.InvalidPlacement);
@@ -289,8 +341,8 @@ export class GameState {
     }
 
     public attemptAttack(initialPosition: Position, targetPosition: Position) {
-        const initialSquare = this.at(initialPosition.y, initialPosition.x);
-        const targetSquare = this.at(targetPosition.y, targetPosition.x);
+        const initialSquare = this.at(initialPosition.row, initialPosition.col);
+        const targetSquare = this.at(targetPosition.row, targetPosition.col);
 
         if (initialSquare.controlledPiece === null)
             throw GameError.withCause(GameErrorCause.NoPieceToAttackWith);

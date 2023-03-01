@@ -9,8 +9,10 @@ export enum GameErrorCause {
     FriendlyFire = "You can't attack your own unit",
     NoAttackTarget = "There's no piece to attack in that square",
     InvalidAttack = "That piece can't attack there",
-    NoPieceToAttackWith = "There's no piece there",
+    NoPieceToAttackWith = "There's no piece to attack with",
     InactivePlayerAttack = 'That piece belongs to the other player',
+    UnmatchingPieces = 'The target piece is not the same type as the discarded one',
+    NoPieceToControlWith = "You don't have a piece in that control zone",
 }
 
 export class GameError extends Error {

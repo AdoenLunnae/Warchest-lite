@@ -5,6 +5,7 @@ import { GameError, GameErrorCause } from './GameError';
 
 describe('Game State', () => {
     var gs: GameState;
+
     beforeEach(() => {
         gs = new GameState();
     });
@@ -85,21 +86,28 @@ e|  .  .  .  W  . \n\
 
     describe('Piece Movement', () => {
         it('can move pieces', () => {
-            const pieces: ControlledPiece[] = [
+            gs['_piecesInPlay'] = [
                 {
-                    piece: PieceFactory.pieceOfType(PieceType.ARCHER),
-                    controller: gs['_crow'],
+                    piece: PieceFactory.pieceOfTypeAt(
+                        PieceType.ARCHER,
+                        Position.from(2, 'a'),
+                    ),
+                    controller: gs.crow,
                 },
                 {
-                    piece: PieceFactory.pieceOfType(PieceType.SWORDSMAN),
-                    controller: gs['_wolf'],
+                    piece: PieceFactory.pieceOfTypeAt(
+                        PieceType.SWORDSMAN,
+                        Position.from(3, 'd'),
+                    ),
+                    controller: gs.wolf,
                 },
             ];
-            pieces[0].piece['_position'] = Position.from(2, 'a');
-            pieces[1].piece['_position'] = Position.from(3, 'd');
-            gs['_piecesInPlay'] = pieces;
-
-            gs.attemptMove(Position.from(2, 'a'), Position.from(3, 'a'));
+            gs.crow['_hand'] = [PieceFactory.pieceOfType(PieceType.ARCHER)];
+            gs.attemptMove(
+                PieceType.ARCHER,
+                Position.from(2, 'a'),
+                Position.from(3, 'a'),
+            );
             expect(gs.at(0, 2).controlledPiece).toBeNull();
             expect(gs.at(0, 3).controlledPiece).not.toBeNull();
             expect(gs.at(0, 3).controlledPiece.piece.type).toBe(
@@ -110,27 +118,38 @@ e|  .  .  .  W  . \n\
 
         it('throws when attempting to move nonexistent piece', () => {
             expect(() => {
-                gs.attemptMove(Position.from(2, 'a'), Position.from(3, 'a'));
+                gs.attemptMove(
+                    PieceType.ARCHER,
+                    Position.from(2, 'a'),
+                    Position.from(3, 'a'),
+                );
             }).toThrowError(GameError.withCause(GameErrorCause.NoPieceToMove));
         });
 
         it('throws when attempting to move to an occupied square', () => {
-            const pieces: ControlledPiece[] = [
+            gs['_piecesInPlay'] = [
                 {
-                    piece: PieceFactory.pieceOfType(PieceType.ARCHER),
-                    controller: gs['_crow'],
+                    piece: PieceFactory.pieceOfTypeAt(
+                        PieceType.ARCHER,
+                        Position.from(2, 'a'),
+                    ),
+                    controller: gs.crow,
                 },
                 {
-                    piece: PieceFactory.pieceOfType(PieceType.SWORDSMAN),
-                    controller: gs['_wolf'],
+                    piece: PieceFactory.pieceOfTypeAt(
+                        PieceType.SWORDSMAN,
+                        Position.from(3, 'a'),
+                    ),
+                    controller: gs.wolf,
                 },
             ];
-            pieces[0].piece['_position'] = Position.from(2, 'a');
-            pieces[1].piece['_position'] = Position.from(3, 'a');
-            gs['_piecesInPlay'] = pieces;
-
+            gs.crow['_hand'] = [PieceFactory.pieceOfType(PieceType.ARCHER)];
             expect(() => {
-                gs.attemptMove(Position.from(2, 'a'), Position.from(3, 'a'));
+                gs.attemptMove(
+                    PieceType.ARCHER,
+                    Position.from(2, 'a'),
+                    Position.from(3, 'a'),
+                );
             }).toThrowError(
                 GameError.withCause(GameErrorCause.OcuppiedTargetSquare),
             );
@@ -139,15 +158,22 @@ e|  .  .  .  W  . \n\
         it('throws when attempting to move a piece from the inactive player', () => {
             const pieces: ControlledPiece[] = [
                 {
-                    piece: PieceFactory.pieceOfType(PieceType.SWORDSMAN),
+                    piece: PieceFactory.pieceOfTypeAt(
+                        PieceType.SWORDSMAN,
+                        Position.from(2, 'a'),
+                    ),
                     controller: gs['_wolf'],
                 },
             ];
-            pieces[0].piece['_position'] = Position.from(2, 'a');
+
             gs['_piecesInPlay'] = pieces;
 
             expect(() => {
-                gs.attemptMove(Position.from(2, 'a'), Position.from(2, 'b'));
+                gs.attemptMove(
+                    PieceType.ARCHER,
+                    Position.from(2, 'a'),
+                    Position.from(2, 'b'),
+                );
             }).toThrowError(
                 GameError.withCause(GameErrorCause.InactivePlayerMove),
             );
