@@ -114,6 +114,12 @@ e|  .  .  .  W  . \n\
                 PieceType.ARCHER,
             );
             expect(gs.at(0, 3).controlledPiece.controller).toBe(gs.crow);
+            expect(gs.crow.handIsEmpty).toBeTruthy();
+            expect(gs.crow['_discard']).toEqual(
+                expect.arrayContaining([
+                    PieceFactory.pieceOfType(PieceType.ARCHER),
+                ]),
+            );
         });
 
         it('throws when attempting to move nonexistent piece', () => {
