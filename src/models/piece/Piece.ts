@@ -26,8 +26,10 @@ export class Piece {
     }
 
     public getMoves(): Position[] {
-        const x = this._position.x;
-        const y = this._position.y;
+        if (this.position === null) return this._allMoves();
+
+        const x = this.position.x;
+        const y = this.position.y;
 
         var validMoves = Array<Position>();
 
@@ -60,8 +62,10 @@ export class Piece {
         return validMoves;
     }
     public getAttackedSquares(): Position[] {
-        const x = this._position.x;
-        const y = this._position.y;
+        if (this.position === null) return [];
+
+        const x = this.position.x;
+        const y = this.position.y;
 
         const possibleAttacks: Array<{ x: number; y: number }> = [
             { x: 1, y: 0 },

@@ -5,7 +5,8 @@ import { MercenaryPiece } from './MercenaryPiece';
 import { SwordsmanPiece } from './SwordsmanPiece';
 import { PieceType } from './PieceType';
 
-export abstract class PieceFactory {
+export class PieceFactory {
+    private constructor() {}
     public static pieceOfType(type: PieceType): Piece {
         switch (type) {
             case PieceType.ARCHER:
@@ -16,6 +17,8 @@ export abstract class PieceFactory {
                 return new MercenaryPiece();
             case PieceType.SWORDSMAN:
                 return new SwordsmanPiece();
+            default:
+                throw new Error('Invalid Piece Type');
         }
     }
 }

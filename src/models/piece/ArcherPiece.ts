@@ -11,8 +11,9 @@ export class ArcherPiece extends Piece {
     protected static readonly _totalNumber: number = 4;
 
     public getAttackedSquares(): Position[] {
-        const x = this._position.x;
-        const y = this._position.y;
+        if (this.position === null) return [];
+        const x = this.position.x;
+        const y = this.position.y;
 
         const possibleAttacks: Array<{ x: number; y: number }> = [
             { x: -2, y: 0 },

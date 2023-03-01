@@ -9,8 +9,8 @@ export class Position {
     private _y: number;
 
     private constructor(x: number, y: number) {
-        this.x = x;
-        this.y = y;
+        this._x = x;
+        this._y = y;
     }
 
     public static fromInts(x: number, y: number): Position {

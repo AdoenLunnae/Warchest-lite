@@ -6,10 +6,10 @@ interface RecruitablePiece {
 }
 
 export class Player {
-    private _bag: Piece[];
-    private _hand: Piece[];
-    private _recruitment: RecruitablePiece[];
-    private _discard: Piece[];
+    private _bag: Piece[] = [];
+    private _hand: Piece[] = [];
+    private _recruitment: RecruitablePiece[] = [];
+    private _discard: Piece[] = [];
 
     private setUpBag(availablePieceTypes: PieceType[]): void {
         this._bag = [];
@@ -69,5 +69,19 @@ export class Player {
 
     public refill(): void {
         this._bag = this._discard.splice(0, this._discard.length);
+    }
+
+    public get handString(): string {
+        return this._hand.map((piece) => piece.type.long).join(', ');
+    }
+
+    public get recruitmentString(): string {
+        return this._recruitment
+            .map((piece) => `${piece.type.long} = ${piece.availableQuantity}`)
+            .join(', ');
+    }
+
+    public get discardString(): string {
+        return this._discard.map((piece) => piece.type.long).join(', ');
     }
 }
