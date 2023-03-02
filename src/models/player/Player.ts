@@ -13,11 +13,11 @@ export class Player {
 
     private setUpBag(availablePieceTypes: PieceType[]): void {
         this._bag = [];
-        debugger;
         availablePieceTypes.forEach((type) => {
             this._bag.push(PieceFactory.pieceOfType(type));
             this._bag.push(PieceFactory.pieceOfType(type));
         });
+        this._bag.push(PieceFactory.pieceOfType(PieceType.ROYAL));
     }
 
     private setUpRecruitment(availablePieceTypes: PieceType[]) {
@@ -46,7 +46,8 @@ export class Player {
     }
 
     public drawHand(): void {
-        for (let i = 0; i < 3; i++) {
+        const numberDraws = Math.min(3, this._bag.length);
+        for (let i = 0; i < numberDraws; i++) {
             this._hand.push(this._getRandomFromBag());
         }
     }

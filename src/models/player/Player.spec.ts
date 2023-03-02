@@ -10,7 +10,7 @@ describe('Player', () => {
 
         expect(player).toBeInstanceOf(Player);
         expect(player['_hand'].length).toBe(0);
-        expect(player['_bag'].length).toBe(4);
+        expect(player['_bag'].length).toBe(5);
         expect(player['_recruitment']).toEqual(
             expect.arrayContaining([
                 {
@@ -31,7 +31,7 @@ describe('Player', () => {
         ]);
         player.drawHand();
         expect(player['_hand'].length).toBe(3);
-        expect(player['_bag'].length).toBe(1);
+        expect(player['_bag'].length).toBe(2);
     });
 
     it('can recruit pieces into the bag', () => {
@@ -41,7 +41,7 @@ describe('Player', () => {
         ]);
         player.recruit(PieceType.ARCHER);
 
-        expect(player['_bag'].length).toBe(5);
+        expect(player['_bag'].length).toBe(6);
         expect(player['_recruitment']).toEqual(
             expect.arrayContaining([
                 {

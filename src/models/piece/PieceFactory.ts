@@ -5,6 +5,7 @@ import { MercenaryPiece } from './MercenaryPiece';
 import { SwordsmanPiece } from './SwordsmanPiece';
 import { PieceType } from './PieceType';
 import { Position } from '../position';
+import { RoyalPiece } from './RoyalPiece';
 
 export class PieceFactory {
     private constructor() {}
@@ -18,6 +19,8 @@ export class PieceFactory {
                 return new MercenaryPiece();
             case PieceType.SWORDSMAN:
                 return new SwordsmanPiece();
+            case PieceType.ROYAL:
+                return new RoyalPiece();
             default:
                 throw new Error(`Invalid Piece Type: ${type}`);
         }
