@@ -29,6 +29,9 @@ export class GameState {
         return this._wolf;
     }
 
+    public crowForfeit: boolean = false;
+    public wolfForfeit: boolean = false;
+
     private _activePlayer: Player;
     public get activePlayer(): Player {
         return this._activePlayer;
@@ -103,9 +106,6 @@ export class GameState {
         this._wolf = Player.withPieceTypes(wolfPieces);
         this._hasTheInitiative = this._crow;
         this._turnEnd = false;
-
-        this._crow.drawHand();
-        this._wolf.drawHand();
 
         this._activePlayer = this._crow;
         this._piecesInPlay = [];
@@ -193,8 +193,7 @@ export class GameState {
         return [
             `Hand: ${this._activePlayer.handString}`,
             `Recruitment pieces: ${this._activePlayer.recruitmentString}`,
-            'Discard pile:',
-            `${this._activePlayer.discardString}`,
+            `Discard pile: ${this._activePlayer.discardString}`,
         ];
     }
 
@@ -236,10 +235,12 @@ export class GameState {
             player,
             () =>
                 this.checkPlayerControlsFourZones(this.wolf) ||
-                this.checkPlayerLose(this.crow),
+                this.checkPlayerLose(this.crow) ||
+                this.crowForfeit,
             () =>
                 this.checkPlayerControlsFourZones(this.crow) ||
-                this.checkPlayerLose(this.wolf),
+                this.checkPlayerLose(this.wolf) ||
+                this.wolfForfeit,
             () => false,
         );
     }
@@ -250,7 +251,7 @@ export class GameState {
         return null;
     }
 
-    public gainControlOfZone(
+    public attemptGainControl(
         discardedPieceType: PieceType,
         position: Position,
     ) {
@@ -267,10 +268,12 @@ export class GameState {
             controlZone.position.row,
             controlZone.position.col,
         ).controlledPiece;
+
         if (piece === null || piece.controller !== this.activePlayer)
             throw GameError.withCause(GameErrorCause.NoPieceToControlWith);
-        if (piece!.piece.type !== discardedPieceType)
-            throw GameError.withCause(GameErrorCause.UnmatchingPieces);
+
+        if (!this.activePlayer.hasPieceInHand(discardedPieceType))
+            throw GameError.withCause(GameErrorCause.NoPieceToDiscard);
 
         this.activePlayer.discard(discardedPieceType);
         this._controlZones[controlZoneIdx].controller = this._activePlayer;
@@ -280,6 +283,7 @@ export class GameState {
         discardedPieceType: PieceType,
         initialPosition: Position,
         targetPosition: Position,
+        isFreeMove: boolean = false,
     ) {
         const initialSquare = this.at(initialPosition.row, initialPosition.col);
         const targetSquare = this.at(targetPosition.row, targetPosition.col);
@@ -296,17 +300,49 @@ export class GameState {
         if (!initialSquare.controlledPiece.piece.canMoveTo(targetPosition))
             throw GameError.withCause(GameErrorCause.InvalidMove);
 
-        if (initialSquare.controlledPiece.piece.type !== discardedPieceType)
+        if (
+            discardedPieceType != PieceType.ROYAL &&
+            initialSquare.controlledPiece.piece.type !== discardedPieceType
+        )
             throw GameError.withCause(GameErrorCause.UnmatchingPieces);
 
-        if (!this.activePlayer.hasPieceInHand(discardedPieceType))
-            throw GameError.withCause(GameErrorCause.NoPieceToDiscard);
+        if (!isFreeMove)
+            if (!this.activePlayer.hasPieceInHand(discardedPieceType))
+                throw GameError.withCause(GameErrorCause.NoPieceToDiscard);
 
         this.activePlayer.discard(discardedPieceType);
 
         this._piecesInPlay
             .find((piece) => piece == initialSquare.controlledPiece)!
             .piece.moveTo(targetPosition);
+    }
+
+    public attemptTakeInitiative(discardedPieceType: PieceType) {
+        if (!this.activePlayer.hasPieceInHand(discardedPieceType))
+            throw GameError.withCause(GameErrorCause.NoPieceToDiscard);
+        this.activePlayer.discard(discardedPieceType);
+        this._hasTheInitiative = this.activePlayer;
+    }
+
+    public attemptRecruit(
+        recruitedPieceType: PieceType,
+        usingRoyal: boolean = false,
+    ) {
+        if (usingRoyal && !this.activePlayer.hasPieceInHand(PieceType.ROYAL))
+            throw GameError.withCause(GameErrorCause.NoPieceToDiscard);
+        if (
+            !usingRoyal &&
+            !this.activePlayer.hasPieceInHand(recruitedPieceType)
+        )
+            throw GameError.withCause(GameErrorCause.NoPieceToDiscard);
+        try {
+            this.activePlayer.recruit(recruitedPieceType);
+        } catch {
+            throw GameError.withCause(GameErrorCause.NoPieceToRecruit);
+        }
+        this.activePlayer.discard(
+            usingRoyal ? PieceType.ROYAL : recruitedPieceType,
+        );
     }
 
     private _getPositionsToPlace(): Position[] {
@@ -347,6 +383,7 @@ export class GameState {
         discardedPieceType: PieceType,
         initialPosition: Position,
         targetPosition: Position,
+        isFreeAttack: boolean = false,
     ) {
         const initialSquare = this.at(initialPosition.row, initialPosition.col);
         const targetSquare = this.at(targetPosition.row, targetPosition.col);
@@ -366,19 +403,56 @@ export class GameState {
         if (!initialSquare.controlledPiece.piece.canAttackTo(targetPosition))
             throw GameError.withCause(GameErrorCause.InvalidAttack);
 
-        if (initialSquare.controlledPiece.piece.type !== discardedPieceType)
+        if (
+            discardedPieceType != PieceType.ROYAL &&
+            initialSquare.controlledPiece.piece.type !== discardedPieceType
+        )
             throw GameError.withCause(GameErrorCause.UnmatchingPieces);
 
-        if (!this.activePlayer.hasPieceInHand(discardedPieceType))
-            throw GameError.withCause(GameErrorCause.NoPieceToDiscard);
+        if (!isFreeAttack) {
+            if (!this.activePlayer.hasPieceInHand(discardedPieceType))
+                throw GameError.withCause(GameErrorCause.NoPieceToDiscard);
 
-        this.activePlayer.discard(discardedPieceType);
-
+            this.activePlayer.discard(discardedPieceType);
+        }
         this._piecesInPlay.splice(
             this._piecesInPlay.findIndex(
                 (piece) => piece == targetSquare.controlledPiece,
             ),
             1,
         );
+    }
+
+    public forfeit() {
+        this.switchByPlayer<void>(
+            this.activePlayer,
+            () => {
+                this.wolfForfeit = true;
+            },
+            () => {
+                this.crowForfeit = true;
+            },
+            () => {
+                return;
+            },
+        );
+    }
+
+    public get canControlAZone(): boolean {
+        return this._controlZones.some(({ position }) => {
+            const piece = this.at(position.row, position.col).controlledPiece;
+            return piece !== null && piece.controller === this._activePlayer;
+        });
+    }
+
+    public get canPlacePiece(): boolean {
+        return this._getPositionsToPlace().some(
+            (position) =>
+                this.at(position.row, position.col).controlledPiece === null,
+        );
+    }
+
+    public get canRecruit(): boolean {
+        return !this.activePlayer.recruitmentIsEmpty;
     }
 }

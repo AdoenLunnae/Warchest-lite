@@ -122,6 +122,43 @@ e|  .  .  .  W  . \n\
             );
         });
 
+        it('can move pieces using a Royal', () => {
+            gs['_piecesInPlay'] = [
+                {
+                    piece: PieceFactory.pieceOfTypeAt(
+                        PieceType.ARCHER,
+                        Position.from(2, 'a'),
+                    ),
+                    controller: gs.crow,
+                },
+                {
+                    piece: PieceFactory.pieceOfTypeAt(
+                        PieceType.SWORDSMAN,
+                        Position.from(3, 'd'),
+                    ),
+                    controller: gs.wolf,
+                },
+            ];
+            gs.crow['_hand'] = [PieceFactory.pieceOfType(PieceType.ROYAL)];
+            gs.attemptMove(
+                PieceType.ROYAL,
+                Position.from(2, 'a'),
+                Position.from(3, 'a'),
+            );
+            expect(gs.at(0, 2).controlledPiece).toBeNull();
+            expect(gs.at(0, 3).controlledPiece).not.toBeNull();
+            expect(gs.at(0, 3).controlledPiece.piece.type).toBe(
+                PieceType.ARCHER,
+            );
+            expect(gs.at(0, 3).controlledPiece.controller).toBe(gs.crow);
+            expect(gs.crow.handIsEmpty).toBeTruthy();
+            expect(gs.crow['_discard']).toEqual(
+                expect.arrayContaining([
+                    PieceFactory.pieceOfType(PieceType.ROYAL),
+                ]),
+            );
+        });
+
         it('throws when attempting to move nonexistent piece', () => {
             expect(() => {
                 gs.attemptMove(
@@ -303,6 +340,34 @@ e|  .  .  .  W  . \n\
             gs.crow['_hand'] = [PieceFactory.pieceOfType(PieceType.ARCHER)];
 
             performAttack();
+
+            expect(gs.at(0, 4).controlledPiece).toBeNull();
+        });
+
+        it('removes a piece that is attacked discarding a Royal', () => {
+            gs['_piecesInPlay'] = [
+                {
+                    piece: PieceFactory.pieceOfTypeAt(
+                        PieceType.ARCHER,
+                        Position.from(2, 'a'),
+                    ),
+                    controller: gs.crow,
+                },
+                {
+                    piece: PieceFactory.pieceOfTypeAt(
+                        PieceType.SWORDSMAN,
+                        Position.from(4, 'a'),
+                    ),
+                    controller: gs.wolf,
+                },
+            ];
+            gs.crow['_hand'] = [PieceFactory.pieceOfType(PieceType.ROYAL)];
+
+            gs.attemptAttack(
+                PieceType.ROYAL,
+                Position.from(2, 'a'),
+                Position.from(4, 'a'),
+            );
 
             expect(gs.at(0, 4).controlledPiece).toBeNull();
         });
