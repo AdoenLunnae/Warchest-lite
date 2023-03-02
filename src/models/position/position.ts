@@ -29,7 +29,8 @@ export class Position {
     }
 
     public toString(): string {
-        return `{${this.col}, ${this.row}}`;
+        const rowLetter = String.fromCharCode('a'.charCodeAt(0) + this.row);
+        return `(${rowLetter},${this.col})`;
     }
 
     public get col() {
