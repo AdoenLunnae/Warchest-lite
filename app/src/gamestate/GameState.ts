@@ -3,7 +3,7 @@ import { Player } from '../models/player';
 import { Position } from '../models/position';
 import { GameError, GameErrorCause } from './GameError';
 
-export interface ControlledPiece {
+interface ControlledPiece {
     piece: Piece;
     controller: Player;
 }
@@ -33,26 +33,21 @@ export class GameState {
     public wolfForfeit: boolean = false;
 
     private _activePlayer: Player;
+
     public get activePlayer(): Player {
         return this._activePlayer;
     }
 
     private _hasTheInitiative: Player;
-    public get hasTheInitiative(): Player {
-        return this._hasTheInitiative;
-    }
 
-    private _turnEnd: boolean;
+    private _turnEnd: boolean = false;
+
     public get turnEnd(): boolean {
         return this._turnEnd;
     }
+
     private _piecesInPlay: ControlledPiece[];
-    public get piecesInPlay(): ControlledPiece[] {
-        return this._piecesInPlay;
-    }
-    public set piecesInPlay(value: ControlledPiece[]) {
-        this._piecesInPlay = value;
-    }
+
     private _controlZones: ControlZone[];
 
     private switchByPlayer<T>(
@@ -108,34 +103,21 @@ export class GameState {
         this._turnEnd = false;
 
         this._activePlayer = this._crow;
-        this._piecesInPlay = [];
-
-        this._controlZones = [
-            {
-                position: Position.from(1, 'a'),
-                controller: this._crow,
-            },
-            {
-                position: Position.from(2, 'b'),
-                controller: null,
-            },
-            {
-                position: Position.from(1, 'c'),
-                controller: null,
-            },
-            {
-                position: Position.from(3, 'c'),
-                controller: null,
-            },
-            {
-                position: Position.from(2, 'd'),
-                controller: null,
-            },
-            {
-                position: Position.from(3, 'e'),
-                controller: this._wolf,
-            },
+        this._piecesInPlay = Array<ControlledPiece>();
+        const startingControlZones = [
+            [1, 'a', this._crow],
+            [2, 'b', null],
+            [1, 'c', null],
+            [3, 'c', null],
+            [2, 'd', null],
+            [3, 'e', this._wolf],
         ];
+        this._controlZones = startingControlZones.map((zone) => {
+            return {
+                position: Position.from(zone[0] as number, zone[1] as string),
+                controller: zone[2] as Player | null,
+            };
+        });
     }
 
     public at(row: number, col: number): Square {
@@ -154,7 +136,11 @@ export class GameState {
         };
     }
 
-    private _getControlZoneRepr(controlZone: ControlZone | null): string {
+    public atPosition(position: Position): Square {
+        return this.at(position.row, position.col);
+    }
+
+    private _getControlZoneString(controlZone: ControlZone | null): string {
         if (controlZone === null) return ' . ';
         else
             return this.switchByPlayer<string>(
@@ -165,7 +151,7 @@ export class GameState {
             );
     }
 
-    private _getRowRepr(row: number): string {
+    private _getRowString(row: number): string {
         //Row letter
         var result = `${String.fromCharCode('a'.charCodeAt(0) + row)}| `;
         for (var col = 0; col < 5; ++col) {
@@ -173,7 +159,7 @@ export class GameState {
             const { controlledPiece: piece, controlZone } = this.at(row, col);
             if (piece === null) {
                 debugger;
-                result += this._getControlZoneRepr(controlZone);
+                result += this._getControlZoneString(controlZone);
             } else {
                 result += ` ${piece.piece.type.short}${
                     piece.controller === this._crow ? '^' : 'v'
@@ -205,7 +191,7 @@ export class GameState {
         result.push(`   ${'___'.repeat(5)}`);
 
         // Board
-        for (var row = 0; row < 5; ++row) result.push(this._getRowRepr(row));
+        for (var row = 0; row < 5; ++row) result.push(this._getRowString(row));
 
         //Player info
         result.push(this._turnIndicator);
@@ -269,13 +255,13 @@ export class GameState {
             controlZone.position.col,
         ).controlledPiece;
 
-        if (piece === null || piece.controller !== this.activePlayer)
+        if (piece === null || piece.controller !== this._activePlayer)
             throw GameError.withCause(GameErrorCause.NoPieceToControlWith);
 
-        if (!this.activePlayer.hasPieceInHand(discardedPieceType))
+        if (!this._activePlayer.hasPieceInHand(discardedPieceType))
             throw GameError.withCause(GameErrorCause.NoPieceToDiscard);
 
-        this.activePlayer.discard(discardedPieceType);
+        this._activePlayer.discard(discardedPieceType);
         this._controlZones[controlZoneIdx].controller = this._activePlayer;
     }
 
@@ -285,8 +271,8 @@ export class GameState {
         targetPosition: Position,
         isFreeMove: boolean = false,
     ) {
-        const initialSquare = this.at(initialPosition.row, initialPosition.col);
-        const targetSquare = this.at(targetPosition.row, targetPosition.col);
+        const initialSquare = this.atPosition(initialPosition);
+        const targetSquare = this.atPosition(targetPosition);
 
         if (initialSquare.controlledPiece === null)
             throw GameError.withCause(GameErrorCause.NoPieceToMove);
@@ -306,11 +292,11 @@ export class GameState {
         )
             throw GameError.withCause(GameErrorCause.UnmatchingPieces);
 
-        if (!isFreeMove)
-            if (!this.activePlayer.hasPieceInHand(discardedPieceType))
+        if (!isFreeMove) {
+            if (!this._activePlayer.hasPieceInHand(discardedPieceType))
                 throw GameError.withCause(GameErrorCause.NoPieceToDiscard);
-
-        this.activePlayer.discard(discardedPieceType);
+            this._activePlayer.discard(discardedPieceType);
+        }
 
         this._piecesInPlay
             .find((piece) => piece == initialSquare.controlledPiece)!
@@ -318,29 +304,29 @@ export class GameState {
     }
 
     public attemptTakeInitiative(discardedPieceType: PieceType) {
-        if (!this.activePlayer.hasPieceInHand(discardedPieceType))
+        if (!this._activePlayer.hasPieceInHand(discardedPieceType))
             throw GameError.withCause(GameErrorCause.NoPieceToDiscard);
-        this.activePlayer.discard(discardedPieceType);
-        this._hasTheInitiative = this.activePlayer;
+        this._activePlayer.discard(discardedPieceType);
+        this._hasTheInitiative = this._activePlayer;
     }
 
     public attemptRecruit(
         recruitedPieceType: PieceType,
         usingRoyal: boolean = false,
     ) {
-        if (usingRoyal && !this.activePlayer.hasPieceInHand(PieceType.ROYAL))
+        if (usingRoyal && !this._activePlayer.hasPieceInHand(PieceType.ROYAL))
             throw GameError.withCause(GameErrorCause.NoPieceToDiscard);
         if (
             !usingRoyal &&
-            !this.activePlayer.hasPieceInHand(recruitedPieceType)
+            !this._activePlayer.hasPieceInHand(recruitedPieceType)
         )
             throw GameError.withCause(GameErrorCause.NoPieceToDiscard);
         try {
-            this.activePlayer.recruit(recruitedPieceType);
+            this._activePlayer.recruit(recruitedPieceType);
         } catch {
             throw GameError.withCause(GameErrorCause.NoPieceToRecruit);
         }
-        this.activePlayer.discard(
+        this._activePlayer.discard(
             usingRoyal ? PieceType.ROYAL : recruitedPieceType,
         );
     }
@@ -354,7 +340,7 @@ export class GameState {
     }
 
     public attemptPlace(pieceType: PieceType, targetPosition: Position) {
-        const targetSquare = this.at(targetPosition.row, targetPosition.col);
+        const targetSquare = this.atPosition(targetPosition);
 
         if (targetSquare.controlledPiece !== null)
             throw GameError.withCause(GameErrorCause.OcuppiedTargetSquare);
@@ -385,8 +371,8 @@ export class GameState {
         targetPosition: Position,
         isFreeAttack: boolean = false,
     ) {
-        const initialSquare = this.at(initialPosition.row, initialPosition.col);
-        const targetSquare = this.at(targetPosition.row, targetPosition.col);
+        const initialSquare = this.atPosition(initialPosition);
+        const targetSquare = this.atPosition(targetPosition);
 
         if (initialSquare.controlledPiece === null)
             throw GameError.withCause(GameErrorCause.NoPieceToAttackWith);
@@ -410,10 +396,10 @@ export class GameState {
             throw GameError.withCause(GameErrorCause.UnmatchingPieces);
 
         if (!isFreeAttack) {
-            if (!this.activePlayer.hasPieceInHand(discardedPieceType))
+            if (!this._activePlayer.hasPieceInHand(discardedPieceType))
                 throw GameError.withCause(GameErrorCause.NoPieceToDiscard);
 
-            this.activePlayer.discard(discardedPieceType);
+            this._activePlayer.discard(discardedPieceType);
         }
         this._piecesInPlay.splice(
             this._piecesInPlay.findIndex(
@@ -425,7 +411,7 @@ export class GameState {
 
     public forfeit() {
         this.switchByPlayer<void>(
-            this.activePlayer,
+            this._activePlayer,
             () => {
                 this.wolfForfeit = true;
             },
@@ -438,21 +424,46 @@ export class GameState {
         );
     }
 
-    public get canControlAZone(): boolean {
+    public canControlAZone(): boolean {
         return this._controlZones.some(({ position }) => {
-            const piece = this.at(position.row, position.col).controlledPiece;
+            const piece = this.atPosition(position).controlledPiece;
             return piece !== null && piece.controller === this._activePlayer;
         });
     }
 
-    public get canPlacePiece(): boolean {
+    public canPlacePiece(): boolean {
         return this._getPositionsToPlace().some(
-            (position) =>
-                this.at(position.row, position.col).controlledPiece === null,
+            (position) => this.atPosition(position).controlledPiece === null,
         );
     }
 
-    public get canRecruit(): boolean {
-        return !this.activePlayer.recruitmentIsEmpty;
+    public canRecruit(): boolean {
+        return !this._activePlayer.recruitmentIsEmpty;
+    }
+
+    public canMove(): boolean {
+        return this._piecesInPlay
+            .filter(({ controller }) => controller === this._activePlayer)
+            .flatMap(({ piece }) => piece.getMoves())
+            .some(
+                (position) =>
+                    this.atPosition(position).controlledPiece === null,
+            );
+    }
+
+    public canAttack(): boolean {
+        return this._piecesInPlay
+            .filter(({ controller }) => controller === this._activePlayer)
+            .flatMap(({ piece }) => piece.getAttackedSquares())
+            .some(
+                (position) =>
+                    this.atPosition(position).controlledPiece !== null &&
+                    this.atPosition(position).controlledPiece!.controller !==
+                        this._activePlayer,
+            );
+    }
+
+    public canTakeInitiative(): boolean {
+        return this._activePlayer !== this._hasTheInitiative;
     }
 }

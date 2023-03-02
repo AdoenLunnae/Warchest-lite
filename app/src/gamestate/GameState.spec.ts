@@ -1,4 +1,4 @@
-import { ControlledPiece, GameState } from './GameState';
+import { GameState } from './GameState';
 import { Piece, PieceFactory, PieceType } from '../models/piece';
 import { Position } from '../models/position';
 import { GameError, GameErrorCause } from './GameError';
@@ -26,19 +26,22 @@ e|  .  .  .  W  . \n\
         });
 
         it('formats to string with pieces', () => {
-            const pieces: ControlledPiece[] = [
+            gs['_piecesInPlay'] = [
                 {
-                    piece: PieceFactory.pieceOfType(PieceType.ARCHER),
-                    controller: gs['_crow'],
+                    piece: PieceFactory.pieceOfTypeAt(
+                        PieceType.ARCHER,
+                        Position.from(2, 'a'),
+                    ),
+                    controller: gs.crow,
                 },
                 {
-                    piece: PieceFactory.pieceOfType(PieceType.SWORDSMAN),
-                    controller: gs['_wolf'],
+                    piece: PieceFactory.pieceOfTypeAt(
+                        PieceType.SWORDSMAN,
+                        Position.from(3, 'd'),
+                    ),
+                    controller: gs.wolf,
                 },
             ];
-            pieces[0].piece['_position'] = Position.from(2, 'a');
-            pieces[1].piece['_position'] = Position.from(3, 'd');
-            gs['_piecesInPlay'] = pieces;
             expect(gs.toString()).toContain(
                 '\
     0  1  2  3  4 \n\
@@ -199,7 +202,7 @@ e|  .  .  .  W  . \n\
         });
 
         it('throws when attempting to move a piece from the inactive player', () => {
-            const pieces: ControlledPiece[] = [
+            gs['_piecesInPlay'] = [
                 {
                     piece: PieceFactory.pieceOfTypeAt(
                         PieceType.SWORDSMAN,
@@ -208,8 +211,6 @@ e|  .  .  .  W  . \n\
                     controller: gs['_wolf'],
                 },
             ];
-
-            gs['_piecesInPlay'] = pieces;
 
             expect(() => {
                 gs.attemptMove(
@@ -262,14 +263,15 @@ e|  .  .  .  W  . \n\
         });
 
         it('throws when attempting to place in an occupied zone', () => {
-            const pieces: ControlledPiece[] = [
+            gs['_piecesInPlay'] = [
                 {
-                    piece: PieceFactory.pieceOfType(PieceType.ARCHER),
-                    controller: gs['_crow'],
+                    piece: PieceFactory.pieceOfTypeAt(
+                        PieceType.ARCHER,
+                        Position.from(2, 'a'),
+                    ),
+                    controller: gs.crow,
                 },
             ];
-            pieces[0].piece['_position'] = Position.from(2, 'a');
-            gs['_piecesInPlay'] = pieces;
 
             const hand: Piece[] = [PieceFactory.pieceOfType(PieceType.ARCHER)];
             gs.crow['_hand'] = [...hand];
