@@ -14,6 +14,7 @@ export enum GameErrorCause {
     UnmatchingPieces = 'The target piece is not the same type as the discarded one',
     NoPieceToControlWith = "You don't have a piece in that control zone",
     NoPieceToDiscard = "You don't have that type of piece in your hand",
+    NoPieceToRecruit = "You don't have that type of piece in your recruitment pile",
 }
 
 export class GameError extends Error {
